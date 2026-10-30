@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TalentMatch AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .upload-section {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1rem 0;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+
+        .upload-section:hover {
+            border-color: #0d6efd;
+        }
+
+        .upload-section.has-files {
+            border-color: #198754;
+            background-color: #f8fff9;
+        }
+
+        .file-list {
+            text-align: left;
+            margin-top: 1rem;
+        }
+
+        .analyze-btn {
+            font-size: 1.2rem;
+            padding: 0.75rem 2rem;
+        }
+
+        .results-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .match-percentage {
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+            display: inline-block;
+            min-width: 80px;
+        }
+
+        .strong-match {
+            background-color: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .good-match {
+            background-color: #cce7ff;
+            color: #004085;
+            border: 2px solid #99d6ff;
+        }
+
+        .weak-match {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeaa7;
+        }
+
+        .card {
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .collapse {
+            transition: all 0.3s ease;
+        }
+
+        .summary-bullets {
+            line-height: 1.6;
+            padding-left: 1.2rem;
+        }
+
+        .summary-bullets li {
+            margin-bottom: 0.5rem;
+            padding-left: 0.25rem;
+            list-style-type: disc;
+        }
+
+        .summary-bullets li:last-child {
+            margin-bottom: 0;
+        }
+
+        .border-bottom {
+            border-bottom: 2px solid #e9ecef !important;
+        }
+
+        .card-body .row+.row {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .card-body ul {
+            padding-left: 1.2rem;
+        }
+
+        .card-body ul li {
+            margin-bottom: 0.3rem;
+            list-style-type: disc;
+        }
+
+        .card-body ol li {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 a:hover {
+            color: #4f46e5 !important;
+            transition: color 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="text-center mb-4">
+                    <a href="{{ url_for('index') }}" class="text-decoration-none" style="color: inherit;">
+                        🎯 TalentMatch AI
+                    </a>
+                </h1>
+                <p class="text-center text-muted">AI-powered resume analysis and candidate matching</p>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-info" id="statusBar">
+                    <strong>Status:</strong> <span id="statusText">Ready to upload files</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="upload-section" id="resumeSection">
+                    <h4>📋 Upload Resumes</h4>
+                    <p class="text-muted">PDF, DOC, DOCX files</p>
+                    <input type="file" id="resumeFiles" multiple accept=".pdf,.doc,.docx" class="form-control mb-3">
+                    <button onclick="uploadResumes()" class="btn btn-primary">Upload Resumes</button>
+                    <div id="resumeList" class="file-list"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="upload-section" id="jobSection">
+                    <h4>💼 Upload Job Description</h4>
+                    <p class="text-muted">TXT, PDF, DOC, DOCX files</p>
+                    <input type="file" id="jobFile" accept=".txt,.pdf,.doc,.docx" class="form-control mb-3">
+                    <button onclick="uploadJobDescription()" class="btn btn-primary">Upload Job Description</button>
+                    <div id="jobInfo" class="file-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4 mb-5">
+            <div class="col-12 text-center">
+                <button id="analyzeBtn" onclick="startAnalysis()" class="btn btn-success btn-lg px-5 me-3" disabled>
+                    🚀 Analyze Resumes
+                </button>
+                <button onclick="clearAll()" class="btn btn-outline-danger btn-lg px-4">
+                    🗑️ Clear All
+                </button>
+            </div>
+        </div>
+
+        <div class="row mb-3" id="searchSection" style="display: none;">
+            <div class="col-md-6 offset-md-3">
+                <div class="input-group">
+                    <span class="input-group-text">🔍</span>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search candidates..."
+                        onkeyup="filterResults()">
+                </div>
+            </div>
+        </div>
+
+        <h3>📊 Analysis Results</h3>
+        <div id="resultsContent"></div>
+    </div>
+
+    <div id="loadingSpinner" class="text-center mt-4" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Analyzing...</span>
+        </div>
+        <p class="mt-2">Analyzing resumes...</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentStatus = {
+            resumeCount: 0,
+            hasJobDescription: false
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM loaded, initializing...');
+            try {
+                updateStatus();
+                console.log('Status update completed');
+            } catch (error) {
+                console.error('Error during initialization:', error);
+            }
+        });
+
+        function updateStatus() {
+            console.log('Fetching status...');
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Status received:', data);
+                    if (data.success) {
+                        currentStatus.resumeCount = data.resume_count;
+                        currentStatus.hasJobDescription = data.has_job_description;
+
+                        let statusText = `Resumes: ${data.resume_count}, Job Description: ${data.has_job_description ? 'Yes' : 'No'}`;
+                        document.getElementById('statusText').textContent = statusText;
+
+                        document.getElementById('analyzeBtn').disabled = !data.can_analyze;
+
+                        updateResumeSection(data.resumes);
+                        updateJobSection(data.job_description);
+                    }
+                })
+                .catch(error => {
+                    console.error('Status update error:', error);
+                });
+        }
+
+        function updateResumeSection(resumes) {
+            const section = document.getElementById('resumeSection');
+            const list = document.getElementById('resumeList');
+
+            if (resumes.length > 0) {
+                section.classList.add('has-files');
+                list.innerHTML = '<h6>Uploaded Resumes:</h6>' +
+                    resumes.map(r => `<div class="badge bg-success me-2 mb-1">${r.filename}</div>`).join('');
+            } else {
+                section.classList.remove('has-files');
+                list.innerHTML = '';
+            }
+        }
+
+        function updateJobSection(jobDescription) {
+            const section = document.getElementById('jobSection');
+            const info = document.getElementById('jobInfo');
+
+            if (jobDescription) {
+                section.classList.add('has-files');
+                info.innerHTML = `<h6>Job Description:</h6><div class="badge bg-success">${jobDescription}</div>`;
+            } else {
+                section.classList.remove('has-files');
+                info.innerHTML = '';
+            }
+        }
+
+        function uploadResumes() {
+            try {
+                console.log('uploadResumes called');
+                const fileInput = document.getElementById('resumeFiles');
+                if (!fileInput) {
+                    alert('Error: Resume file input not found');
+                    return;
+                }
+                const files = fileInput.files;
+
+                if (files.length === 0) {
+                    alert('Please select resume files to upload');
+                    return;
+                }
+
+                console.log(`Uploading ${files.length} resume(s)...`);
+                const formData = new FormData();
+                for (let file of files) {
+                    formData.append('files', file);
+                }
+
+                fetch('/upload/resumes', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Upload response:', data);
+                        if (data.success) {
+                            alert(`Successfully uploaded ${data.processed_files.length} resume(s)`);
+                            if (data.errors.length > 0) {
+                                alert('Some files had errors:\n' + data.errors.join('\n'));
+                            }
+                            fileInput.value = '';
+                            updateStatus();
+                        } else {
+                            alert('Upload failed: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Upload error:', error);
+                        alert('Upload failed: ' + error.message);
+                    });
+
+            } catch (error) {
+                console.error('Error in uploadResumes:', error);
+                alert('Error in upload function: ' + error.message);
+            }
+        }
+
+        function uploadJobDescription() {
+            console.log('uploadJobDescription called');
+            const fileInput = document.getElementById('jobFile');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a job description file to upload');
+                return;
+            }
+
+            console.log('Uploading job description...');
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload/job-description', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Job description upload response:', data);
+                    if (data.success) {
+                        alert('Job description uploaded successfully');
+                        fileInput.value = '';
+                        updateStatus();
+                    } else {
+                        alert('Upload failed: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Upload error:', error);
+                    alert('Upload failed: ' + error.message);
+                });
+        }
+
+        function startAnalysis() {
+            console.log('startAnalysis called');
+            if (currentStatus.resumeCount === 0 || !currentStatus.hasJobDescription) {
+                alert('Please upload both resumes and job description before analyzing');
+                return;
+            }
+
+            console.log('Starting analysis...');
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('resultsContent').innerHTML = '';
+
+            fetch('/analyze', {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Analysis response:', data);
+                    document.getElementById('loadingSpinner').style.display = 'none';
+
+                    if (data.success) {
+                        displayResults(data);
+                    } else {
+                        alert('Analysis failed: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    console.error('Analysis error:', error);
+                    alert('Analysis failed: ' + error.message);
+                });
+        }
+
+        function clearAll() {
+            console.log('clearAll called');
+            if (confirm('Are you sure you want to clear all uploaded files?')) {
+                fetch('/clear', {
+                    method: 'POST'
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Clear response:', data);
+                        if (data.success) {
+                            alert('All files cleared successfully');
+                            document.getElementById('resumeFiles').value = '';
+                            document.getElementById('jobFile').value = '';
+                            document.getElementById('resultsContent').innerHTML = '';
+                            document.getElementById('searchSection').style.display = 'none';
+                            updateStatus();
+                        } else {
+                            alert('Failed to clear files: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Clear error:', error);
+                        alert('Failed to clear files: ' + error.message);
+                    });
+            }
+        }
+
+        function displayResults(data) {
+            console.log('displayResults called with', data.results.length, 'results');
+            const resultsContent = document.getElementById('resultsContent');
+            let html = '';
+
+            if (data.errors && data.errors.length > 0) {
+                const errorResults = data.results.filter(r => r.error);
+                if (errorResults.length > 0) {
+                    html += `<div class="alert alert-warning">
+                        <h5 class="alert-heading">⚠️ Partial Analysis Completed</h5>
+                        <p>Successfully analyzed <strong>${data.results.length - errorResults.length}</strong> resumes.</p>
+                        <p class="mb-0"><strong>${errorResults.length}</strong> resume(s) failed due to AWS service issues. You can try re-uploading these files and analyzing again.</p>
+                    </div>`;
+                }
+            }
+
+            data.results.forEach((result, index) => {
+                if (result.error) {
+                    html += `<div class="card mb-3 shadow-sm border-warning">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h5 class="mb-1 text-warning">⚠️ Could Not Analyze</h5>
+                                    <p class="mb-1">📁 <strong>${result.filename}</strong></p>
+                                    <small class="text-muted">This resume could not be processed due to a service issue. Please try re-uploading and analyzing again.</small>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <div class="alert alert-warning mb-0 py-2">
+                                        <small><strong>Analysis Failed</strong><br>Please retry</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                    return;
+                }
+
+                const matchClass = getMatchClass(result.recommendation);
+                const candidateName = getCandidateName(result, index);
+
+                html += `
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <h5 class="mb-1 text-primary">${candidateName}</h5>
+                                ${result.current_designation ? `<div class="mb-1"><small class="text-dark"><strong>💼 ${result.current_designation}</strong></small></div>` : ''}
+                                ${result.current_company ? `<div class="mb-1"><small class="text-secondary">🏢 ${result.current_company}</small></div>` : ''}
+                                <small class="text-muted">📁 ${result.filename}</small>
+                                ${result.email ? `<br><small class="text-success">📧 ${result.email}</small>` : ''}
+                                ${result.phone ? `<br><small class="text-success">📱 ${result.phone}</small>` : ''}
+                                ${result.location ? `<br><small class="text-info">📍 ${result.location}</small>` : ''}
+                            </div>
+
+                            <div class="col-md-2 text-center">
+                                <div class="match-percentage ${matchClass}">
+                                    <h3 class="mb-0">${result.match_percentage}%</h3>
+                                    <small>Match</small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 text-center">
+                                <span class="badge ${getRecommendationBadgeClass(result.recommendation)} fs-6 p-2">
+                                    ${formatRecommendation(result.recommendation)}
+                                </span>
+                            </div>
+
+                            <div class="col-md-3 text-end">
+                                <button class="btn btn-outline-primary btn-sm" onclick="toggleDetails(${index})" id="toggleBtn${index}">
+                                    📋 View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="collapse" id="details${index}">
+                        <div class="card-body border-top bg-light">
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <h6 class="text-primary border-bottom pb-2 mb-3">📝 Summary</h6>
+                                    ${result.summary_bullets && result.summary_bullets.length > 0 ?
+                        `<ul class="summary-bullets">${result.summary_bullets.map(bullet => `<li>${bullet}</li>`).join('')}</ul>` :
+                        result.summary ? `<p>${result.summary}</p>` : '<p class="text-muted">No summary available</p>'
+                    }
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <h6 class="text-success border-bottom pb-2 mb-3">💪 Strengths</h6>
+                                    ${result.strengths && result.strengths.length > 0 ?
+                        `<ul class="mb-0">${result.strengths.map(s => `<li>${s}</li>`).join('')}</ul>` :
+                        '<p class="text-muted">No strengths identified</p>'
+                    }
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <h6 class="text-warning border-bottom pb-2 mb-3">⚠️ Areas for Improvement</h6>
+                                    ${result.areas_for_improvement && result.areas_for_improvement.length > 0 ?
+                        `<ul class="mb-0">${result.areas_for_improvement.map(a => `<li>${a}</li>`).join('')}</ul>` :
+                        '<p class="text-muted">No areas for improvement identified</p>'
+                    }
+                                </div>
+                            </div>
+
+                            ${result.key_highlights && result.key_highlights.length > 0 ? `
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <h6 class="text-info border-bottom pb-2 mb-3">⭐ Key Highlights</h6>
+                                        <ul class="mb-0">${result.key_highlights.map(h => `<li>${h}</li>`).join('')}</ul>
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            ${result.skills_analysis ? `
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <h6 class="text-success border-bottom pb-2 mb-3">✅ Skills Matched</h6>
+                                        ${result.skills_analysis.required_skills_matched && result.skills_analysis.required_skills_matched.length > 0 ?
+                            `<div class="d-flex flex-wrap gap-1">${result.skills_analysis.required_skills_matched.map(skill => `<span class="badge bg-success">${skill}</span>`).join('')}</div>` :
+                            '<p class="text-muted">No matching skills found</p>'
+                        }
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <h6 class="text-danger border-bottom pb-2 mb-3">❌ Skills Missing</h6>
+                                        ${result.skills_analysis.required_skills_missing && result.skills_analysis.required_skills_missing.length > 0 ?
+                            `<div class="d-flex flex-wrap gap-1">${result.skills_analysis.required_skills_missing.map(skill => `<span class="badge bg-warning text-dark">${skill}</span>`).join('')}</div>` :
+                            '<p class="text-muted">No missing skills identified</p>'
+                        }
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <h6 class="text-info border-bottom pb-2 mb-3">🎯 Additional Skills</h6>
+                                        ${result.skills_analysis.additional_skills && result.skills_analysis.additional_skills.length > 0 ?
+                            `<div class="d-flex flex-wrap gap-1">${result.skills_analysis.additional_skills.map(skill => `<span class="badge bg-info">${skill}</span>`).join('')}</div>` :
+                            '<p class="text-muted">No additional skills identified</p>'
+                        }
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            ${result.interview_questions && result.interview_questions.length > 0 ? `
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <h6 class="text-primary border-bottom pb-2 mb-3">❓ Interview Questions</h6>
+                                        <ol class="mb-0">${result.interview_questions.map(q => `<li class="mb-2">${q}</li>`).join('')}</ol>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+
+            resultsContent.innerHTML = html;
+            document.getElementById('searchSection').style.display = 'flex';
+            resultsContent.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function getMatchClass(recommendation) {
+            if (!recommendation) return 'weak-match';
+            if (recommendation === 'STRONG_MATCH' || recommendation === 'Strong Match') return 'strong-match';
+            if (recommendation === 'GOOD_MATCH' || recommendation === 'Good Match') return 'good-match';
+            return 'weak-match';
+        }
+
+        function getRecommendationBadgeClass(recommendation) {
+            if (!recommendation) return 'bg-warning text-dark';
+            if (recommendation === 'STRONG_MATCH' || recommendation === 'Strong Match') return 'bg-success';
+            if (recommendation === 'GOOD_MATCH' || recommendation === 'Good Match') return 'bg-primary';
+            return 'bg-warning text-dark';
+        }
+
+        function formatRecommendation(recommendation) {
+            if (!recommendation) return 'Unknown';
+            return recommendation.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        function getCandidateName(result, index) {
+            if (result.candidate_name && result.candidate_name.trim()) {
+                return result.candidate_name.trim();
+            }
+            if (result.email && result.email.includes('@')) {
+                const emailPrefix = result.email.split('@')[0];
+                return emailPrefix.replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            }
+            if (result.filename) {
+                const name = result.filename.replace(/\.(pdf|docx?|txt)$/i, '')
+                    .replace(/[_-]/g, ' ')
+                    .replace(/\b\w/g, l => l.toUpperCase());
+                return name.length > 50 ? name.substring(0, 50) + '...' : name;
+            }
+            return `Candidate ${index + 1}`;
+        }
+
+        function toggleDetails(index) {
+            const detailsElement = document.getElementById(`details${index}`);
+            const toggleBtn = document.getElementById(`toggleBtn${index}`);
+
+            if (detailsElement.classList.contains('show')) {
+                detailsElement.classList.remove('show');
+                toggleBtn.innerHTML = '📋 View Details';
+                toggleBtn.classList.remove('btn-primary');
+                toggleBtn.classList.add('btn-outline-primary');
+            } else {
+                detailsElement.classList.add('show');
+                toggleBtn.innerHTML = '📋 Hide Details';
+                toggleBtn.classList.remove('btn-outline-primary');
+                toggleBtn.classList.add('btn-primary');
+            }
+        }
+
+        function filterResults() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('#resultsContent .card.shadow-sm');
+
+            cards.forEach(card => {
+                const text = card.innerText.toLowerCase();
+                if (text.includes(searchText)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

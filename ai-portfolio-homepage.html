@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Applications Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        thead th {
+            padding: 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        thead th:first-child {
+            width: 60px;
+            text-align: center;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e9ecef;
+            transition: background 0.2s ease;
+            cursor: pointer;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        tbody tr:nth-child(4n+1),
+        tbody tr:nth-child(4n+2) {
+            background: #ffffff;
+        }
+
+        tbody tr:nth-child(4n+3),
+        tbody tr:nth-child(4n+4) {
+            background: #f8f9fa;
+        }
+
+        tbody tr.expanded {
+            background: #e7f3ff !important;
+        }
+
+        tbody td {
+            padding: 20px;
+        }
+
+        td.serial {
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        td.app-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .status-badge {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 4px 10px;
+            background: #10b981;
+            color: white;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+
+        .status-badge.coming-soon {
+            background: #f59e0b;
+        }
+
+        .resources {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .icon-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: #667eea;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 22px;
+            transition: transform 0.2s ease, background 0.2s ease;
+            position: relative;
+        }
+
+        .icon-link:hover {
+            transform: translateY(-3px) scale(1.1);
+            background: #764ba2;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .icon-link .tooltip {
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .icon-link:hover .tooltip {
+            opacity: 1;
+        }
+
+        .details-row {
+            display: none;
+        }
+
+        .details-row.show {
+            display: table-row;
+        }
+
+        .details-cell {
+            padding: 20px 40px;
+            background: #ffffff;
+            border-left: 4px solid #667eea;
+        }
+
+        .details-content {
+            color: #666;
+            line-height: 1.8;
+            font-size: 0.95em;
+        }
+
+        .toggle-icon {
+            float: right;
+            font-size: 1.2em;
+            color: #999;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            opacity: 0.9;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            thead th,
+            tbody td {
+                padding: 12px 8px;
+                font-size: 0.9em;
+            }
+
+            .resources {
+                gap: 8px;
+            }
+
+            .icon-link {
+                width: 38px;
+                height: 38px;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 AI Applications Portfolio</h1>
+            <p>Click any row to see more details</p>
+        </header>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>Application Name</th>
+                        <th>Resources</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Application 1: Cloud Path Advisor -->
+                    <tr onclick="toggleDetails('app1')">
+                        <td class="serial">1</td>
+                        <td class="app-name">
+                            Cloud Path Advisor
+                            <span class="status-badge">LIVE</span>
+                            <span class="toggle-icon" id="toggle-app1">▼</span>
+                        </td>
+                        <td class="resources">
+                            <a href="https://heilzkvdapcuod66rabb7eqsjy0lbgaq.lambda-url.us-east-1.on.aws/"
+                                target="_blank" class="icon-link" onclick="event.stopPropagation()">
+                                🌐
+                                <span class="tooltip">Launch App</span>
+                            </a>
+                            <a href="https://ai-portfolio-homepage.s3.us-east-1.amazonaws.com/Cloud_Path_Advisor_final.mp4"
+                                target="_blank" class="icon-link" onclick="event.stopPropagation()">
+                                🎥
+                                <span class="tooltip">Demo Video</span>
+                            </a>
+                            <a href="PLACEHOLDER_PPT_URL.pptx" target="_blank" class="icon-link"
+                                onclick="event.stopPropagation()">
+                                📊
+                                <span class="tooltip">Presentation</span>
+                            </a>
+                            <a href="https://github.com/yourorg/cloud-path-advisor" target="_blank" class="icon-link"
+                                onclick="event.stopPropagation()">
+                                💻
+                                <span class="tooltip">Source Code</span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr class="details-row" id="details-app1">
+                        <td colspan="3" class="details-cell">
+                            <div class="details-content">
+                                <strong>About:</strong> AI-powered cloud migration advisor that analyzes on-premises
+                                infrastructure
+                                and provides intelligent recommendations for AWS, Azure, and GCP with cost estimates.
+                                <br><br>
+                                <strong>Features:</strong>
+                                <ul style="margin-left: 20px; margin-top: 5px;">
+                                    <li>Upload Excel/CSV configurations</li>
+                                    <li>Get AI-powered multi-cloud recommendations</li>
+                                    <li>Cost estimation and comparison</li>
+                                    <li>Cloud optimization suggestions</li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Application 2: AI Resume Analysis -->
+                    <tr onclick="toggleDetails('app2')">
+                        <td class="serial">2</td>
+                        <td class="app-name">
+                            AI Resume Analysis
+                            <span class="status-badge">LIVE</span>
+                            <span class="toggle-icon" id="toggle-app2">▼</span>
+                        </td>
+                        <td class="resources">
+                            <a href="https://q2isbdx5snbwfersayivck44zq0tfhfc.lambda-url.us-east-1.on.aws/"
+                                target="_blank" class="icon-link" onclick="event.stopPropagation()">
+                                🌐
+                                <span class="tooltip">Launch App</span>
+                            </a>
+                            <a href="PLACEHOLDER_VIDEO_URL.mp4" target="_blank" class="icon-link"
+                                onclick="event.stopPropagation()">
+                                🎥
+                                <span class="tooltip">Demo Video</span>
+                            </a>
+                            <a href="PLACEHOLDER_PPT_URL.pptx" target="_blank" class="icon-link"
+                                onclick="event.stopPropagation()">
+                                📊
+                                <span class="tooltip">Presentation</span>
+                            </a>
+                            <a href="PLACEHOLDER_CODE_PATH" target="_blank" class="icon-link"
+                                onclick="event.stopPropagation()">
+                                💻
+                                <span class="tooltip">Source Code</span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr class="details-row" id="details-app2">
+                        <td colspan="3" class="details-cell">
+                            <div class="details-content">
+                                <strong>About:</strong> AI-powered resume analyzer that matches candidates to job
+                                descriptions using AWS Bedrock (Claude 3.5 Sonnet).
+                                <br><br>
+                                <strong>Features:</strong>
+                                <ul style="margin-left: 20px; margin-top: 5px;">
+                                    <li>Resume vs Job Description Analysis</li>
+                                    <li>Match Percentage & Recommendation</li>
+                                    <li>Detailed Skills & Experience Gap Analysis</li>
+                                    <li>Interview Question Generation</li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Application 3: PLACEHOLDER -->
+                    <tr onclick="toggleDetails('app3')">
+                        <td class="serial">3</td>
+                        <td class="app-name">
+                            AI Application 3
+                            <span class="status-badge coming-soon">COMING SOON</span>
+                            <span class="toggle-icon" id="toggle-app3">▼</span>
+                        </td>
+                        <td class="resources">
+                            <a href="PLACEHOLDER_APP_URL" target="_blank" class="icon-link"
+                                onclick="event.stopPropagation()">
+                                🌐
+                                <span class="tooltip">Launch App</span>
+                            </a>
+                            <a href="PLACEHOLDER_VIDEO_URL.mp4" target="_blank" class="icon-link"
+                                onclick="event.stopPropagation()">
+                                🎥
+                                <span class="tooltip">Demo Video</span>
+                            </a>
+                            <a href="PLACEHOLDER_PPT_URL.pptx" target="_blank" class="icon-link"
+                                onclick="event.stopPropagation()">
+                                📊
+                                <span class="tooltip">Presentation</span>
+                            </a>
+                            <a href="PLACEHOLDER_CODE_PATH" target="_blank" class="icon-link"
+                                onclick="event.stopPropagation()">
+                                💻
+                                <span class="tooltip">Source Code</span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr class="details-row" id="details-app3">
+                        <td colspan="3" class="details-cell">
+                            <div class="details-content">
+                                <strong>About:</strong> Add your application description here.
+                                <br><br>
+                                <strong>Features:</strong>
+                                <ul style="margin-left: 20px; margin-top: 5px;">
+                                    <li>Feature 1</li>
+                                    <li>Feature 2</li>
+                                    <li>Feature 3</li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Application 4: PLACEHOLDER -->
+                    <tr onclick="toggleDetails('app4')">
+                        <td class="serial">4</td>
+                        <td class="app-name">
+                            AI Application 4
+                            <span class="status-badge coming-soon">COMING SOON</span>
+                            <span class="toggle-icon" id="toggle-app4">▼</span>
+                        </td>
+                        <td class="resources">
+                            <a href="PLACEHOLDER_APP_URL" target="_blank" class="icon-link"
+                                onclick="event.stopPropagation()">
+                                🌐
+                                <span class="tooltip">Launch App</span>
+                            </a>
+                            <a href="PLACEHOLDER_VIDEO_URL.mp4" target="_blank" class="icon-link"
+                                onclick="event.stopPropagation()">
+                                🎥
+                                <span class="tooltip">Demo Video</span>
+                            </a>
+                            <a href="PLACEHOLDER_PPT_URL.pptx" target="_blank" class="icon-link"
+                                onclick="event.stopPropagation()">
+                                📊
+                                <span class="tooltip">Presentation</span>
+                            </a>
+                            <a href="PLACEHOLDER_CODE_PATH" target="_blank" class="icon-link"
+                                onclick="event.stopPropagation()">
+                                💻
+                                <span class="tooltip">Source Code</span>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr class="details-row" id="details-app4">
+                        <td colspan="3" class="details-cell">
+                            <div class="details-content">
+                                <strong>About:</strong> Add your application description here.
+                                <br><br>
+                                <strong>Features:</strong>
+                                <ul style="margin-left: 20px; margin-top: 5px;">
+                                    <li>Feature 1</li>
+                                    <li>Feature 2</li>
+                                    <li>Feature 3</li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            <p>🚀 Powered by AWS Bedrock & AI Innovation | Subrahmanyam Nallamlli @2025</p>
+        </footer>
+    </div>
+
+    <script>
+        function toggleDetails(appId) {
+            const detailsRow = document.getElementById('details-' + appId);
+            const toggleIcon = document.getElementById('toggle-' + appId);
+            const parentRow = toggleIcon.closest('tr');
+
+            if (detailsRow.classList.contains('show')) {
+                detailsRow.classList.remove('show');
+                toggleIcon.classList.remove('rotated');
+                parentRow.classList.remove('expanded');
+            } else {
+                detailsRow.classList.add('show');
+                toggleIcon.classList.add('rotated');
+                parentRow.classList.add('expanded');
+            }
+        }
+    </script>
+</body>
+
+</html>
